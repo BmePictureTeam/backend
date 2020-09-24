@@ -29,7 +29,7 @@ async fn hello_picture_team(
     config: web::Data<Config>,
 ) -> impl Responder {
     HttpResponse::Ok()
-        .content_type("text/plain")
+        .content_type("application/json")
         .json(HelloResponse {
             message: format!(
                 "Hello from the Picture Team, {}!",
