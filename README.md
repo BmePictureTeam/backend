@@ -1,6 +1,6 @@
 # PictureTeam Server
 
-The backend of Picture Team for Mobil&Fullstack Téma labor (currently only a hello-world).
+The backend of Picture Team for Mobil&Fullstack Témalabor (currently only a hello-world).
 
 - [PictureTeam Server](#pictureteam-server)
     - [Dependencies](#dependencies)
