@@ -1,43 +1,36 @@
-use actix_web::{
-    get,
-    web::{self, ServiceConfig},
-    HttpResponse, Responder,
-};
-use serde::{Deserialize, Serialize};
+use actix_cors::Cors;
+use actix_web::{App, HttpServer};
+use slog::{info, Logger};
 
-use crate::config::Config;
+use crate::{config::Config, logger::LoggerMw};
 
-pub fn routes(app: &mut ServiceConfig) {
-    app.service(hello_picture_team);
-}
+pub mod routes;
 
-#[derive(Debug, Deserialize)]
-struct HelloQuery {
-    name: Option<String>,
-}
+pub async fn run(config: Config, log: Logger, db: sqlx::PgPool) -> anyhow::Result<()> {
+    let host = config.host.clone();
+    let port = config.port;
 
-#[derive(Debug, Serialize, Deserialize)]
-#[serde(rename_all = "camelCase")]
-pub struct HelloResponse {
-    pub message: String,
-    pub server_config: Config,
-}
+    info!(log, "server start";
+        "host" => &host,
+        "port" => port
+    );
 
-#[get("/hello")]
-async fn hello_picture_team(
-    query: web::Query<HelloQuery>,
-    config: web::Data<Config>,
-) -> impl Responder {
-    HttpResponse::Ok()
-        .content_type("application/json")
-        .json(HelloResponse {
-            message: format!(
-                "Hello from the Picture Team, {}!",
-                query
-                    .into_inner()
-                    .name
-                    .unwrap_or_else(|| "visitor".to_string())
-            ),
-            server_config: (&*config.into_inner()).clone(),
-        })
+    HttpServer::new(move || {
+        App::new()
+            .data(config.clone())
+            .data(db.clone())
+            .wrap(LoggerMw::new(log.clone()))
+            .wrap(
+                Cors::new()
+                    .allowed_header("All")
+                    .allowed_origin("*")
+                    .finish(),
+            )
+            .configure(routes::setup_routes)
+    })
+    .bind(format!("{}:{}", host, port))?
+    .run()
+    .await?;
+
+    Ok(())
 }

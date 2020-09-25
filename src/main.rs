@@ -1,39 +1,28 @@
-use actix_cors::Cors;
-use actix_web::{App, HttpServer};
+use clap::App;
 use pt_server::{
     config::Config,
-    logger::{create_logger, LoggerExt, LoggerMw},
-    server::routes,
+    db,
+    logger::{create_logger, LoggerExt},
+    server,
 };
-use slog::info;
 
-#[actix_web::main]
-async fn main() -> anyhow::Result<()> {
+fn main() -> anyhow::Result<()> {
     let config = Config::from_env()?;
+
+    let matches = App::new("Picture Team Server")
+        .version(env!("CARGO_PKG_VERSION"))
+        .about("Server for the Picture Team applications")
+        .subcommand(App::new("migrate").about("Runs the database migrations"))
+        .get_matches();
 
     let log = create_logger(&config).with_scope("http-server");
 
-    let port = config.port.unwrap_or(8080);
-
-    info!(log, "listening";
-        "port" => port
-    );
-
-    HttpServer::new(move || {
-        App::new()
-            .data(config.clone())
-            .wrap(LoggerMw::new(log.clone()))
-            .wrap(
-                Cors::new()
-                    .allowed_header("All")
-                    .allowed_origin("*")
-                    .finish(),
-            )
-            .configure(routes)
-    })
-    .bind(format!("0.0.0.0:{}", port))?
-    .run()
-    .await?;
-
-    Ok(())
+    match matches.subcommand_name() {
+        Some("migrate") => Ok(db::migrate(&config, log)?),
+        None => actix_web::rt::System::new("http-server").block_on(async move {
+            let db_pool = db::connect(&config).await?;
+            Ok(server::run(config, log, db_pool).await?)
+        }),
+        _ => unreachable!(),
+    }
 }

@@ -11,7 +11,7 @@ use std::{
     sync::Mutex,
     task::{Context, Poll},
 };
-use time::{Duration, OffsetDateTime};
+use time::OffsetDateTime;
 
 pub fn create_logger(config: &Config) -> Logger {
     if config.log_json {
@@ -108,13 +108,13 @@ where
         Box::pin(async move {
             let res = next.await?;
 
-            let status = res.status();
-            let latency: Duration = OffsetDateTime::now_utc() - start;
+            let time_ms =
+                (OffsetDateTime::now_utc() - start).whole_nanoseconds() as f32 / 1_000_000f32;
 
             info!(log, "request";
                 "path" => path,
-                "status" => status.to_string(),
-                "time" => latency.whole_milliseconds(),
+                "status" => res.status().as_u16(),
+                "time" => format!("{}ms", time_ms),
                 "userAgent" => agent,
                 "address" => address,
             );
