@@ -31,7 +31,6 @@ pub async fn run(config: Config, log: Logger, db: sqlx::PgPool) -> anyhow::Resul
             .wrap(
                 Cors::new()
                     .allowed_header("All")
-                    .allowed_origin("*")
                     .finish(),
             )
             .configure(routes::setup_routes)
