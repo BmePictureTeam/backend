@@ -51,10 +51,10 @@ metadata:
 spec:
   tls:
     - hosts:
-        - temalab.cicum.icu
+        - api.temalab.cicum.icu
       secretName: letsencrypt-pt-server
   rules:
-    - host: temalab.cicum.icu
+    - host: api.temalab.cicum.icu
       http:
         paths:
           - path: /

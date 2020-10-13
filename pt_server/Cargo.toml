@@ -6,7 +6,7 @@ edition = "2018"
 
 [dependencies]
 actix-web = "3"
-actix-cors = "0.3"
+actix-cors = "0.4"
 actix-service = "1"
 actix-rt = "1"
 
@@ -30,6 +30,7 @@ once_cell = "1.4"
 
 [dependencies.sqlx]
 version = "0.4.0-beta.1"
+git = "https://github.com/launchbadge/sqlx.git"
 default-features = false
 features = [
     "postgres",
@@ -38,4 +39,5 @@ features = [
     "time",
     "uuid",
     "json",
+    "offline",
 ]
