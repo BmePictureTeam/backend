@@ -1,13 +1,14 @@
 use crate::{
-    config::Config, logger::LoggerMw, model::error::GenericError,
-    services::app_user::DefaultAppUserService, services::AppUserService, services::AuthService,
-    services::DefaultAuthService,
+    config::Config, model::error::GenericError, services::AuthService,
+    services::DefaultAuthService, services::DefaultImageService, services::ImageService,
 };
 use actix_cors::Cors;
 use actix_web::{web::ServiceConfig, App, HttpServer};
 use aide::openapi::v3::{generate_api, transform, ui::ReDoc};
 use slog::{info, Logger};
 
+pub mod extractors;
+pub mod middleware;
 pub mod routes;
 
 pub async fn run(config: Config, logger: Logger, pool: sqlx::PgPool) -> anyhow::Result<()> {
@@ -19,12 +20,11 @@ pub async fn run(config: Config, logger: Logger, pool: sqlx::PgPool) -> anyhow::
         "port" => port
     );
 
-    // let app_user_service = DefaultAppUserService::new();
-
     HttpServer::new(move || {
         App::new()
-            .wrap(LoggerMw::new(logger.clone()))
+            .wrap(middleware::Logger::new(logger.clone()))
             .wrap(Cors::new().allowed_header("All").finish())
+            .data(logger.clone())
             .configure(configure_services(&config, logger.clone(), pool.clone()))
             .configure(configure_routes(&config))
     })
@@ -42,19 +42,20 @@ pub fn configure_services(
 ) -> impl FnOnce(&mut ServiceConfig) {
     let c = config.clone();
     move |app: &mut ServiceConfig| {
-        let app_user_service = DefaultAppUserService::new(&c, logger.clone(), pool.clone());
-        let auth_service = DefaultAuthService::new(&c, logger, pool);
+        let auth_service = DefaultAuthService::new(&c, logger.clone(), pool.clone());
+        let image_service = DefaultImageService::new(&c, logger, pool);
 
-        app.data::<Box<dyn AppUserService>>(Box::new(app_user_service));
         app.data::<Box<dyn AuthService>>(Box::new(auth_service));
+        app.data::<Box<dyn ImageService>>(Box::new(image_service));
     }
 }
 
 pub fn configure_routes(config: &Config) -> impl FnOnce(&mut ServiceConfig) {
     let c = config.clone();
     move |app: &mut ServiceConfig| {
-        routes::user::configure_routes(&c)(app);
-        
+        routes::auth::configure_routes(&c)(app);
+        routes::image::configure_routes(&c)(app);
+
         if c.api_docs {
             let api = generate_api(None)
                 .unwrap()
@@ -72,6 +73,5 @@ pub fn configure_routes(config: &Config) -> impl FnOnce(&mut ServiceConfig) {
                     .actix_service("/docs"),
             );
         }
-
     }
 }

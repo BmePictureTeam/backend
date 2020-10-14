@@ -1,8 +1,10 @@
-pub mod app_user;
+use dyn_clone::DynClone;
+
 pub mod auth;
+pub mod image;
 
-pub trait Service: Send + Sync {}
-impl<S> Service for S where S: Send + Sync {}
+pub trait Service: Send + Sync + DynClone {}
+impl<S> Service for S where S: Send + Sync + DynClone {}
 
-pub use app_user::{AppUserService, DefaultAppUserService};
 pub use auth::{AuthService, DefaultAuthService};
+pub use image::{ImageService, DefaultImageService};

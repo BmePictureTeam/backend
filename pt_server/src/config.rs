@@ -1,3 +1,5 @@
+use std::path::PathBuf;
+
 use serde::{Deserialize, Serialize};
 
 use crate::util::random_string;
@@ -26,6 +28,9 @@ pub struct Config {
 
     /// API docs at server root URL.
     pub api_docs: bool,
+
+    /// Where the uploaded images are stored.
+    pub image_storage_path: PathBuf,
 }
 
 impl Config {
@@ -44,6 +49,7 @@ impl Default for Config {
             database_url: "postgresql://postgres:postgres@localhost:5432/postgres".into(),
             token_secret: random_string(32),
             api_docs: true,
+            image_storage_path: PathBuf::from("./uploaded_images/"),
         }
     }
 }

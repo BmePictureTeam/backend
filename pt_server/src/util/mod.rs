@@ -11,7 +11,6 @@ pub fn validate_email(email: &str) -> bool {
 fn test_validate_email() {
     assert!(!validate_email("asdasd"));
     assert!(validate_email("asd@gmail.com"));
-
 }
 
 pub fn random_string(char_count: usize) -> String {

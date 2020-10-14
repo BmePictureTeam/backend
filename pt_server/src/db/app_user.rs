@@ -5,7 +5,7 @@ use super::image::{Image, NewImage};
 
 pub struct AppUser {
     pub id: Uuid,
-    pub created: time::PrimitiveDateTime,
+    pub created: time::OffsetDateTime,
     pub email: String,
     pub password_hash: String,
     pub is_admin: bool,
@@ -17,7 +17,7 @@ impl AppUser {
         email: &str,
         password_hash: &str,
         admin: bool,
-    ) -> Result<Uuid, anyhow::Error> {
+    ) -> Result<Uuid, sqlx::Error> {
         Ok(
             query_file!("queries/app_user/create.sql", email, password_hash, admin)
                 .fetch_one(pool)
@@ -26,7 +26,7 @@ impl AppUser {
         )
     }
 
-    pub async fn by_id(id: Uuid, pool: &PgPool) -> Result<Option<AppUser>, anyhow::Error> {
+    pub async fn by_id(id: Uuid, pool: &PgPool) -> Result<Option<AppUser>, sqlx::Error> {
         let res = query_file_as!(AppUser, "queries/app_user/get_by_id.sql", id)
             .fetch_one(pool)
             .await;
@@ -40,7 +40,7 @@ impl AppUser {
         }
     }
 
-    pub async fn by_email(email: &str, pool: &PgPool) -> Result<Option<AppUser>, anyhow::Error> {
+    pub async fn by_email(email: &str, pool: &PgPool) -> Result<Option<AppUser>, sqlx::Error> {
         let res = query_file_as!(AppUser, "queries/app_user/get_by_email.sql", email)
         .fetch_one(pool)
         .await;
@@ -57,11 +57,11 @@ impl AppUser {
 
 /// Methods for an instance
 impl AppUser {
-    pub async fn add_image(&self, image: NewImage, pool: &PgPool) -> Result<Uuid, anyhow::Error> {
+    pub async fn add_image(&self, image: NewImage, pool: &PgPool) -> Result<Uuid, sqlx::Error> {
         Image::new(self.id, image, pool).await
     }
 
-    pub async fn save(&self, pool: &PgPool) -> Result<(), anyhow::Error> {
+    pub async fn save(&self, pool: &PgPool) -> Result<(), sqlx::Error> {
         query_file!(
             "queries/app_user/update.sql",
             &self.id,
