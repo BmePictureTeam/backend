@@ -1,0 +1,335 @@
+{
+  "db": "PostgreSQL",
+  "331f780b0f09a4600859ec359514acdecb09a1021d63702eef6b54f1020494fe": {
+    "query": "INSERT\n\tINTO\n\timage (app_user_id, id, upload_date, title, description)\nVALUES ($1, $2, $3, $4, $5);",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Uuid",
+          "Timestamp",
+          "Text",
+          "Text"
+        ]
+      },
+      "nullable": []
+    }
+  },
+  "49e289b86d3e60f00b63387a470a4165cf3ab1c7a410343dd072e3d4f9aff6b0": {
+    "query": "SELECT *\nFROM app_user\nWHERE email = $1;",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "id",
+          "type_info": "Uuid"
+        },
+        {
+          "ordinal": 1,
+          "name": "created",
+          "type_info": "Timestamp"
+        },
+        {
+          "ordinal": 2,
+          "name": "email",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 3,
+          "name": "password_hash",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 4,
+          "name": "is_admin",
+          "type_info": "Bool"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Text"
+        ]
+      },
+      "nullable": [
+        false,
+        false,
+        false,
+        false,
+        false
+      ]
+    }
+  },
+  "58d0f23a5567ea058cbd6aaa198beebf88bb87d5a52a7d5542c909e3c8ae25e5": {
+    "query": "INSERT\n\tINTO\n\tapp_user (email, password_hash, is_admin)\nVALUES($1, $2, $3) RETURNING id;",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "id",
+          "type_info": "Uuid"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Text",
+          "Text",
+          "Bool"
+        ]
+      },
+      "nullable": [
+        false
+      ]
+    }
+  },
+  "67d4f600e1eb720a1b8ec8898aa742267e4aa66b1763a7071eef4c5fbebb6c6d": {
+    "query": "SELECT\n\t(created, description, id, title, upload_date)\nFROM\n\timage i\nWHERE\n\ti.app_user_id = $1;",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "row",
+          "type_info": "Record"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      },
+      "nullable": [
+        null
+      ]
+    }
+  },
+  "69b4bbdd9dec3a61c201e597d24dd616c87e6dacb5be5479abafac3db0e41079": {
+    "query": "SELECT created,\n\tdescription,\n\tid,\n\ttitle,\n\tupload_date\nFROM image i\nWHERE i.id = $1;",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "created",
+          "type_info": "Timestamp"
+        },
+        {
+          "ordinal": 1,
+          "name": "description",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 2,
+          "name": "id",
+          "type_info": "Uuid"
+        },
+        {
+          "ordinal": 3,
+          "name": "title",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 4,
+          "name": "upload_date",
+          "type_info": "Timestamp"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      },
+      "nullable": [
+        false,
+        true,
+        false,
+        false,
+        false
+      ]
+    }
+  },
+  "bd8060873657a19b475e4f7578769c21bac66a4fa74765369ba45ec3a6dd878d": {
+    "query": "SELECT *\nFROM app_user\nWHERE id = $1;",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "id",
+          "type_info": "Uuid"
+        },
+        {
+          "ordinal": 1,
+          "name": "created",
+          "type_info": "Timestamp"
+        },
+        {
+          "ordinal": 2,
+          "name": "email",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 3,
+          "name": "password_hash",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 4,
+          "name": "is_admin",
+          "type_info": "Bool"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      },
+      "nullable": [
+        false,
+        false,
+        false,
+        false,
+        false
+      ]
+    }
+  },
+  "c1e5be1fcc50796b854c6c921d5f95712f2c7f9d70365416b27158bc8f210025": {
+    "query": "INSERT\n\tINTO\n\timage (app_user_id, upload_date, title, description)\nVALUES ($1, $2, $3, $4) RETURNING id;",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "id",
+          "type_info": "Uuid"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Timestamp",
+          "Text",
+          "Text"
+        ]
+      },
+      "nullable": [
+        false
+      ]
+    }
+  },
+  "c4a96a34d143c6a696728940433e33e7adf22e27c0e55e28fd79e9cbd7d88cf2": {
+    "query": "SELECT\n\tcreated, description, id, title, upload_date\nFROM\n\timage i\nWHERE\n\ti.app_user_id = $1;",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "created",
+          "type_info": "Timestamp"
+        },
+        {
+          "ordinal": 1,
+          "name": "description",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 2,
+          "name": "id",
+          "type_info": "Uuid"
+        },
+        {
+          "ordinal": 3,
+          "name": "title",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 4,
+          "name": "upload_date",
+          "type_info": "Timestamp"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      },
+      "nullable": [
+        false,
+        true,
+        false,
+        false,
+        false
+      ]
+    }
+  },
+  "dc0bf9bcd5d78e04b07b5fe01f077b31832b2994f02d85df2d12ff46e477860c": {
+    "query": "UPDATE\n\tapp_user\nSET\n\temail = $2,\n\tpassword_hash = $3,\n\tis_admin = $4\nWHERE\n\tapp_user.id = $1;",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Text",
+          "Text",
+          "Bool"
+        ]
+      },
+      "nullable": []
+    }
+  },
+  "de1645d68c9745c90345de6ff09bbb10c560cca2fad5aa152c0f9b796dd2d529": {
+    "query": "SELECT created,\n\tdescription,\n\tid,\n\tapp_user_id,\n\ttitle,\n\tupload_date\nFROM image i\nWHERE i.id = $1;",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "created",
+          "type_info": "Timestamp"
+        },
+        {
+          "ordinal": 1,
+          "name": "description",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 2,
+          "name": "id",
+          "type_info": "Uuid"
+        },
+        {
+          "ordinal": 3,
+          "name": "app_user_id",
+          "type_info": "Uuid"
+        },
+        {
+          "ordinal": 4,
+          "name": "title",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 5,
+          "name": "upload_date",
+          "type_info": "Timestamp"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      },
+      "nullable": [
+        false,
+        true,
+        false,
+        false,
+        false,
+        false
+      ]
+    }
+  },
+  "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855": {
+    "query": "",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Left": []
+      },
+      "nullable": []
+    }
+  }
+}

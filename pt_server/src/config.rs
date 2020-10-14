@@ -1,5 +1,7 @@
 use serde::{Deserialize, Serialize};
 
+use crate::util::random_string;
+
 pub static CONFIG_ENV_PREFIX: &str = "PT_";
 
 /// Available configuration values.
@@ -18,6 +20,12 @@ pub struct Config {
 
     /// Postgres database URL.
     pub database_url: String,
+
+    /// Secret for generating JWTs.
+    pub token_secret: String,
+
+    /// API docs at server root URL.
+    pub api_docs: bool,
 }
 
 impl Config {
@@ -34,6 +42,8 @@ impl Default for Config {
             port: 8080,
             log_json: false,
             database_url: "postgresql://postgres:postgres@localhost:5432/postgres".into(),
+            token_secret: random_string(32),
+            api_docs: true,
         }
     }
 }

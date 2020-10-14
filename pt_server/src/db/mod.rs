@@ -1,6 +1,9 @@
 use crate::config::Config;
 use sqlx::postgres::PgPoolOptions;
 
+pub mod app_user;
+pub mod image;
+
 pub async fn connect(config: &Config) -> anyhow::Result<sqlx::PgPool> {
     Ok(PgPoolOptions::new()
         .max_connections(5)
