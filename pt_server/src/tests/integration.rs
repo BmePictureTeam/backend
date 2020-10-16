@@ -235,15 +235,19 @@ async fn whole_app() {
         assert!(res.categories.len() - 1 == category_count);
 
         let rename_category_req = test::TestRequest::put()
-        .uri(&format!("/categories/{}", &category_id))
-        .header("Authorization", format!("Bearer {}", token))
-        .set_json(&RenameCategoryRequest {
-            name: "new_category_name".into(),
-        })
-        .to_request();
+            .uri(&format!("/categories/{}", &category_id))
+            .header("Authorization", format!("Bearer {}", token))
+            .set_json(&RenameCategoryRequest {
+                name: format!("new_category_name_{}", random_string(24)),
+            })
+            .to_request();
 
         let res = test::call_service(&mut app, rename_category_req).await;
-        assert!(res.status().as_u16() == 204);
+        assert!(
+            res.status().as_u16() == 204,
+            "expected 204, but got response {:?}",
+            res
+        );
     }
 
     // User register and login
