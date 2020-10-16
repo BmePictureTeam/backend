@@ -22,15 +22,29 @@ Configuration is done via environment variables prefixed with `PT_`, available o
 
 #### Database
 
-SQLx relies on the database schema for type-safe SQL queries in code. A running database is required on the first compilation or whenever a migration is added. The connection string should be set in the `PT_DATABASE_URL` environment variable.
+A PostgreSQL database is required for development and deployment.
+
+SQLx relies on the database schema for type-safe SQL queries in code. A running database with the correct schema is required whenever the database-specific code is changed.
 
 ##### Migrations
 
-Migrations can be found in [migrations](migrations) and can be applied with a utility: `cargo run --bin pt_util -- migrate`, or any other PostgreSQL utility, as they're plain SQL.
+Migrations can be found in [migrations](migrations) and should be applied with the [`sqlx-cli`](https://lib.rs/crates/sqlx-cli) utility: `sqlx mig run`.
 
 ### Running Tests
 
-Simply `cargo test`.
+Run `cargo test -p pt_server --lib`.
+
+The output should be something like:
+```
+    Finished test [unoptimized + debuginfo] target(s) in 0.09s
+     Running target/debug/deps/pt_server-6da2475205f47403
+
+running 2 tests
+test util::test_validate_email ... ok
+test tests::integration::whole_app ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out
+```
 
 ### Running The Server
 

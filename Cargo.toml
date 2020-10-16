@@ -1,2 +1,2 @@
 [workspace]
-members = ["pt_server", "pt_util"]
+members = ["pt_server"]
