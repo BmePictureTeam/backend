@@ -55,6 +55,7 @@ pub fn configure_routes(config: &Config) -> impl FnOnce(&mut ServiceConfig) {
     move |app: &mut ServiceConfig| {
         routes::auth::configure_routes(&c)(app);
         routes::image::configure_routes(&c)(app);
+        routes::category::configure_routes(&c)(app);
 
         if c.api_docs {
             let api = generate_api(None)

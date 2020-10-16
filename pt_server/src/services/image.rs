@@ -1,12 +1,12 @@
 use super::Service;
 use crate::{
-    config::Config, db::image::Image, db::image::NewImage, model::image::CreateImageError,
-    model::image::UploadImageError,
+    config::Config, db::category::Category, db::category::CategoryExt, db::image::Image,
+    db::image::NewImage, db::rating::Rating, model::image::*,
 };
 use actix_files::NamedFile;
 use actix_multipart::Multipart;
 use async_trait::async_trait;
-use futures::{StreamExt, TryStreamExt};
+use futures::{future::join_all, StreamExt, TryStreamExt};
 use slog::{error, Logger};
 use sqlx::PgPool;
 use std::{ffi::OsString, path::Path};
@@ -23,9 +23,28 @@ pub trait ImageService: Service {
         &self,
         app_user_id: Uuid,
         image: NewImage,
+        categories: &[Uuid],
     ) -> Result<Uuid, CreateImageError>;
     async fn save_image(&self, id: Uuid, payload: Multipart) -> Result<(), UploadImageError>;
     async fn get_image(&self, id: Uuid) -> Result<NamedFile, std::io::Error>;
+    async fn search_images(
+        &self,
+        search: Option<&str>,
+        offset: Option<u64>,
+        limit: Option<u64>,
+    ) -> Result<Vec<(Image, Vec<Category>)>, SearchImagesError>;
+
+    async fn rate_image(
+        &self,
+        image_id: Uuid,
+        app_user_id: Uuid,
+        rating: u32,
+    ) -> Result<(), RateImageError>;
+    async fn get_image_ratings(&self, image_id: Uuid) -> Result<Vec<Rating>, GetImageRatingsError>;
+
+    async fn get_categories(&self) -> Result<Vec<CategoryExt>, GetCategoriesError>;
+    async fn create_category(&self, name: &str) -> Result<Uuid, CreateCategoryError>;
+    async fn rename_category(&self, id: Uuid, name: &str) -> Result<(), RenameCategoryError>;
 }
 dyn_clone::clone_trait_object!(ImageService);
 
@@ -53,15 +72,50 @@ impl ImageService for DefaultImageService {
         &self,
         app_user_id: Uuid,
         image: NewImage,
+        categories: &[Uuid],
     ) -> Result<Uuid, CreateImageError> {
-        Image::new(app_user_id, image, &self.pool)
+        if categories.is_empty() {
+            return Err(CreateImageError::NoCategory);
+        }
+
+        let db_categories =
+            futures::future::join_all(categories.iter().map(|id| Category::by_id(*id, &self.pool)))
+                .await
+                .into_iter()
+                .collect::<Result<Vec<_>, _>>()
+                .map_err(|e| {
+                    error!(&self.logger, "unexpected database error";
+                        "error" => e.to_string()
+                    );
+                    CreateImageError::Unexpected
+                })?
+                .into_iter()
+                .zip(categories)
+                .map(|(o, id)| o.ok_or(CreateImageError::CategoryNotFound(*id)))
+                .collect::<Result<Vec<_>, _>>()?;
+
+        let image_id = Image::new(app_user_id, image, &self.pool)
             .await
             .map_err(|e| {
                 error!(&self.logger, "unexpected database error";
                     "error" => e.to_string()
                 );
                 CreateImageError::Unexpected
-            })
+            })?;
+
+        for category in db_categories {
+            category
+                .add_image(image_id, &self.pool)
+                .await
+                .map_err(|e| {
+                    error!(&self.logger, "unexpected database error";
+                        "error" => e.to_string()
+                    );
+                    CreateImageError::Unexpected
+                })?;
+        }
+
+        Ok(image_id)
     }
 
     async fn save_image(&self, id: Uuid, mut payload: Multipart) -> Result<(), UploadImageError> {
@@ -74,7 +128,7 @@ impl ImageService for DefaultImageService {
 
         match img {
             Some(mut img) => {
-                if img.image.upload_date.is_some() {
+                if img.upload_date.is_some() {
                     return Err(UploadImageError::AlreadyUploaded);
                 }
 
@@ -128,9 +182,9 @@ impl ImageService for DefaultImageService {
                                 })?;
                             }
 
-                            img.image.upload_date = Some(OffsetDateTime::now_utc());
+                            img.upload_date = Some(OffsetDateTime::now_utc());
 
-                            img.image.save(&self.pool).await.map_err(|e| {
+                            img.save(&self.pool).await.map_err(|e| {
                                 error!(&self.logger, "unexpected database error";
                                     "error" => e.to_string()
                                 );
@@ -159,5 +213,132 @@ impl ImageService for DefaultImageService {
                 .join(&id.to_hyphenated().to_string())
                 .with_extension("png"),
         )
+    }
+
+    async fn search_images(
+        &self,
+        search: Option<&str>,
+        offset: Option<u64>,
+        limit: Option<u64>,
+    ) -> Result<Vec<(Image, Vec<Category>)>, SearchImagesError> {
+        let images = Image::search(
+            search.unwrap_or(""),
+            offset.map(|v| v as _),
+            limit.map(|v| v as _),
+            &self.pool,
+        )
+        .await
+        .map_err(|e| {
+            error!(&self.logger, "unexpected database error";
+                "error" => e.to_string()
+            );
+            SearchImagesError::Unexpected
+        })?;
+
+        let categories = join_all(images.iter().map(|i| i.categories(&self.pool)))
+            .await
+            .into_iter()
+            .collect::<Result<Vec<_>, _>>()
+            .map_err(|e| {
+                error!(&self.logger, "unexpected database error";
+                    "error" => e.to_string()
+                );
+                SearchImagesError::Unexpected
+            })?;
+
+        Ok(images.into_iter().zip(categories).collect())
+    }
+
+    async fn rate_image(
+        &self,
+        image_id: Uuid,
+        app_user_id: Uuid,
+        rating: u32,
+    ) -> Result<(), RateImageError> {
+        let image = Image::by_id(image_id, &self.pool)
+            .await
+            .map_err(|e| {
+                error!(&self.logger, "unexpected database error";
+                    "error" => e.to_string()
+                );
+                RateImageError::Unexpected
+            })?
+            .ok_or(RateImageError::ImageNotFound)?;
+
+        if image.app_user_id == app_user_id {
+            return Err(RateImageError::OwnImage);
+        }
+
+        if rating > 5 || rating == 0 {
+            return Err(RateImageError::InvalidRating);
+        }
+
+        image
+            .rate(app_user_id, rating as _, &self.pool)
+            .await
+            .map_err(|e| {
+                error!(&self.logger, "unexpected database error";
+                    "error" => e.to_string()
+                );
+                RateImageError::Unexpected
+            })
+    }
+
+    async fn get_image_ratings(&self, image_id: Uuid) -> Result<Vec<Rating>, GetImageRatingsError> {
+        let image = Image::by_id(image_id, &self.pool)
+            .await
+            .map_err(|e| {
+                error!(&self.logger, "unexpected database error";
+                    "error" => e.to_string()
+                );
+                GetImageRatingsError::Unexpected
+            })?
+            .ok_or(GetImageRatingsError::ImageNotFound)?;
+
+        image.ratings(&self.pool).await.map_err(|e| {
+            error!(&self.logger, "unexpected database error";
+                "error" => e.to_string()
+            );
+            GetImageRatingsError::Unexpected
+        })
+    }
+
+    async fn get_categories(&self) -> Result<Vec<CategoryExt>, GetCategoriesError> {
+        CategoryExt::all(&self.pool).await.map_err(|e| {
+            error!(&self.logger, "unexpected database error";
+                "error" => e.to_string()
+            );
+            GetCategoriesError::Unexpected
+        })
+    }
+
+    async fn create_category(&self, name: &str) -> Result<Uuid, CreateCategoryError> {
+        Category::new(name, &self.pool).await.map_err(|e| {
+            error!(&self.logger, "unexpected database error";
+                "error" => e.to_string()
+            );
+            CreateCategoryError::Unexpected
+        })
+    }
+
+    async fn rename_category(&self, id: Uuid, name: &str) -> Result<(), RenameCategoryError> {
+        let mut category = Category::by_id(id, &self.pool)
+            .await
+            .map_err(|e| {
+                error!(&self.logger, "unexpected database error";
+                    "error" => e.to_string()
+                );
+                RenameCategoryError::Unexpected
+            })?
+            .ok_or(RenameCategoryError::CategoryNotFound)?;
+
+        category.category_name = name.into();
+
+        category.save(&self.pool).await.map_err(|e| {
+            error!(&self.logger, "unexpected database error";
+                "error" => e.to_string()
+            );
+            RenameCategoryError::Unexpected
+        })
     }
 }

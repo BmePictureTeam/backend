@@ -1,4 +1,5 @@
 CREATE extension IF NOT EXISTS "uuid-ossp";
+CREATE EXTENSION IF NOT EXISTS "pg_trgm";
 CREATE TABLE app_user(
     id UUID NOT NULL PRIMARY KEY DEFAULT uuid_generate_v4(),
     created TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -18,6 +19,11 @@ CREATE TABLE image(
     title TEXT NOT NULL,
     description TEXT,
     app_user_id UUID NOT NULL REFERENCES app_user(id)
+);
+CREATE TABLE image_category(
+    category_id UUID NOT NULL REFERENCES category(id),
+    image_id UUID NOT NULL REFERENCES image(id),
+    PRIMARY KEY (category_id, image_id)
 );
 CREATE TABLE rating(
     app_user_id UUID NOT NULL REFERENCES app_user(id),
