@@ -1,19 +1,164 @@
 {
   "db": "PostgreSQL",
-  "331f780b0f09a4600859ec359514acdecb09a1021d63702eef6b54f1020494fe": {
-    "query": "INSERT\n\tINTO\n\timage (app_user_id, id, upload_date, title, description)\nVALUES ($1, $2, $3, $4, $5);",
+  "2f184b65b312c966ba82fe68befa2677c79e8acd986eb924320e5c4a41b7ca7c": {
+    "query": "SELECT\n\t*\nFROM\n\timage i\nWHERE\n\ti.app_user_id = $1;",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "id",
+          "type_info": "Uuid"
+        },
+        {
+          "ordinal": 1,
+          "name": "created",
+          "type_info": "Timestamptz"
+        },
+        {
+          "ordinal": 2,
+          "name": "upload_date",
+          "type_info": "Timestamptz"
+        },
+        {
+          "ordinal": 3,
+          "name": "title",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 4,
+          "name": "description",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 5,
+          "name": "app_user_id",
+          "type_info": "Uuid"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      },
+      "nullable": [
+        false,
+        false,
+        true,
+        false,
+        true,
+        false
+      ]
+    }
+  },
+  "3c123ae23cfe69f269ed2135e0bcc5e4fb41f95031455646aae5ee88705c4995": {
+    "query": "INSERT\n\tINTO\n\trating(app_user_id, image_id, rating)\nVALUES ($1, $2, $3) \nON CONFLICT (app_user_id, image_id)\nDO UPDATE\nSET\n\trating = $3;",
     "describe": {
       "columns": [],
       "parameters": {
         "Left": [
           "Uuid",
           "Uuid",
-          "Timestamp",
+          "Int4"
+        ]
+      },
+      "nullable": []
+    }
+  },
+  "43b6921c0f19221219e632bbb3d7a75bf53955234d4d2ebc2df43a6f4ca32d97": {
+    "query": "SELECT\n\t*\nFROM\n\timage i\nWHERE\n\ti.title % $1\n\tOR i.description % $1\nORDER BY\n\tSIMILARITY(i.title, $1) DESC\nOFFSET $2\nLIMIT $3;",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "id",
+          "type_info": "Uuid"
+        },
+        {
+          "ordinal": 1,
+          "name": "created",
+          "type_info": "Timestamptz"
+        },
+        {
+          "ordinal": 2,
+          "name": "upload_date",
+          "type_info": "Timestamptz"
+        },
+        {
+          "ordinal": 3,
+          "name": "title",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 4,
+          "name": "description",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 5,
+          "name": "app_user_id",
+          "type_info": "Uuid"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Text",
+          "Int8",
+          "Int8"
+        ]
+      },
+      "nullable": [
+        false,
+        false,
+        true,
+        false,
+        true,
+        false
+      ]
+    }
+  },
+  "46b63065682597e24914ed42062effe2a547d6f02956dfa485f62c1aa2f9f069": {
+    "query": "UPDATE image\nSET upload_date = $2,\n\ttitle = $3,\n\tdescription = $4\nWHERE\n\tid = $1;",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Timestamptz",
           "Text",
           "Text"
         ]
       },
       "nullable": []
+    }
+  },
+  "4858ce3b083e8f1e0ab02c6af1129034243a8da1f0531da1d0974eb066dfe050": {
+    "query": "SELECT * FROM category;",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "id",
+          "type_info": "Uuid"
+        },
+        {
+          "ordinal": 1,
+          "name": "created",
+          "type_info": "Timestamptz"
+        },
+        {
+          "ordinal": 2,
+          "name": "category_name",
+          "type_info": "Text"
+        }
+      ],
+      "parameters": {
+        "Left": []
+      },
+      "nullable": [
+        false,
+        false,
+        false
+      ]
     }
   },
   "49e289b86d3e60f00b63387a470a4165cf3ab1c7a410343dd072e3d4f9aff6b0": {
@@ -28,7 +173,7 @@
         {
           "ordinal": 1,
           "name": "created",
-          "type_info": "Timestamp"
+          "type_info": "Timestamptz"
         },
         {
           "ordinal": 2,
@@ -60,6 +205,16 @@
       ]
     }
   },
+  "4d20ae75bb294d718ba76e9d6d548c5d1d94b8e3d8fe4938f1c424732bb62744": {
+    "query": "\n        UPDATE app_user\n        SET is_admin = TRUE\n        WHERE \n            app_user.email = 'admin@admin.admin'\n        ",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Left": []
+      },
+      "nullable": []
+    }
+  },
   "58d0f23a5567ea058cbd6aaa198beebf88bb87d5a52a7d5542c909e3c8ae25e5": {
     "query": "INSERT\n\tINTO\n\tapp_user (email, password_hash, is_admin)\nVALUES($1, $2, $3) RETURNING id;",
     "describe": {
@@ -82,14 +237,14 @@
       ]
     }
   },
-  "67d4f600e1eb720a1b8ec8898aa742267e4aa66b1763a7071eef4c5fbebb6c6d": {
-    "query": "SELECT\n\t(created, description, id, title, upload_date)\nFROM\n\timage i\nWHERE\n\ti.app_user_id = $1;",
+  "5d449976f43db717a064d2f056521a75189b726aea2bdd1d9bd1b2eaf9b31b83": {
+    "query": "SELECT \n   COUNT(*) \nFROM \n   image_category ic\nWHERE\n   ic.category_id = $1;",
     "describe": {
       "columns": [
         {
           "ordinal": 0,
-          "name": "row",
-          "type_info": "Record"
+          "name": "count",
+          "type_info": "Int8"
         }
       ],
       "parameters": {
@@ -102,34 +257,24 @@
       ]
     }
   },
-  "69b4bbdd9dec3a61c201e597d24dd616c87e6dacb5be5479abafac3db0e41079": {
-    "query": "SELECT created,\n\tdescription,\n\tid,\n\ttitle,\n\tupload_date\nFROM image i\nWHERE i.id = $1;",
+  "5da81892f0289b15582c9a8c6d2caafa5f8ba3a37b5f088567115e4319783e2e": {
+    "query": "SELECT * FROM rating r\nWHERE r.image_id = $1;",
     "describe": {
       "columns": [
         {
           "ordinal": 0,
-          "name": "created",
-          "type_info": "Timestamp"
-        },
-        {
-          "ordinal": 1,
-          "name": "description",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 2,
-          "name": "id",
+          "name": "app_user_id",
           "type_info": "Uuid"
         },
         {
-          "ordinal": 3,
-          "name": "title",
-          "type_info": "Text"
+          "ordinal": 1,
+          "name": "image_id",
+          "type_info": "Uuid"
         },
         {
-          "ordinal": 4,
-          "name": "upload_date",
-          "type_info": "Timestamp"
+          "ordinal": 2,
+          "name": "rating",
+          "type_info": "Int4"
         }
       ],
       "parameters": {
@@ -139,11 +284,124 @@
       },
       "nullable": [
         false,
-        true,
-        false,
         false,
         false
       ]
+    }
+  },
+  "6a7b6387fb1391bbc89f14d29916ac4a3638297754e0a8e952ede4d58636460d": {
+    "query": "INSERT INTO category (category_name)\nVALUES ($1)\nRETURNING category.id;",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "id",
+          "type_info": "Uuid"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Text"
+        ]
+      },
+      "nullable": [
+        false
+      ]
+    }
+  },
+  "8ba030f9612256c898a1c6d4a3aa966df6c60b3b4212b5ffef2b78e4bff54d90": {
+    "query": "SELECT *\nFROM image i\nWHERE i.id = $1;",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "id",
+          "type_info": "Uuid"
+        },
+        {
+          "ordinal": 1,
+          "name": "created",
+          "type_info": "Timestamptz"
+        },
+        {
+          "ordinal": 2,
+          "name": "upload_date",
+          "type_info": "Timestamptz"
+        },
+        {
+          "ordinal": 3,
+          "name": "title",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 4,
+          "name": "description",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 5,
+          "name": "app_user_id",
+          "type_info": "Uuid"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      },
+      "nullable": [
+        false,
+        false,
+        true,
+        false,
+        true,
+        false
+      ]
+    }
+  },
+  "9e1ce2a1ec9cc9a24d5f5c1b8973e9c4ef002464004056c33b25de67ef85f879": {
+    "query": "INSERT INTO image_category (category_id, image_id)\nVALUES ($1, $2);",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Uuid"
+        ]
+      },
+      "nullable": []
+    }
+  },
+  "9f4765177677af1a6ccc44675f2226d0faebec5fa02ba716ceb2aced9a93794b": {
+    "query": "INSERT\n\tINTO\n\timage (app_user_id, title, description)\nVALUES ($1, $2, $3) RETURNING id;",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "id",
+          "type_info": "Uuid"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Text",
+          "Text"
+        ]
+      },
+      "nullable": [
+        false
+      ]
+    }
+  },
+  "b1314828d688925c0f6a8cfa7bb843b36cc0409407cae7213b0fb6ab99c1390b": {
+    "query": "\n    UPDATE app_user\n    SET is_admin = TRUE\n    WHERE \n        app_user.email = 'admin@admin.admin'\n    ",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Left": []
+      },
+      "nullable": []
     }
   },
   "bd8060873657a19b475e4f7578769c21bac66a4fa74765369ba45ec3a6dd878d": {
@@ -158,7 +416,7 @@
         {
           "ordinal": 1,
           "name": "created",
-          "type_info": "Timestamp"
+          "type_info": "Timestamptz"
         },
         {
           "ordinal": 2,
@@ -257,6 +515,38 @@
       ]
     }
   },
+  "c8a48523256d9f5854059c168c7dc0b8e681ebe630f9d9c654064ee06c3f576b": {
+    "query": "SELECT\n\tc.id,\n\tc.created,\n\tc.category_name\nFROM\n\tcategory c\nINNER JOIN image_category ic ON\n\tic.image_id = $1;",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "id",
+          "type_info": "Uuid"
+        },
+        {
+          "ordinal": 1,
+          "name": "created",
+          "type_info": "Timestamptz"
+        },
+        {
+          "ordinal": 2,
+          "name": "category_name",
+          "type_info": "Text"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      },
+      "nullable": [
+        false,
+        false,
+        false
+      ]
+    }
+  },
   "dc0bf9bcd5d78e04b07b5fe01f077b31832b2994f02d85df2d12ff46e477860c": {
     "query": "UPDATE\n\tapp_user\nSET\n\temail = $2,\n\tpassword_hash = $3,\n\tis_admin = $4\nWHERE\n\tapp_user.id = $1;",
     "describe": {
@@ -279,7 +569,7 @@
         {
           "ordinal": 0,
           "name": "created",
-          "type_info": "Timestamp"
+          "type_info": "Timestamptz"
         },
         {
           "ordinal": 1,
@@ -304,7 +594,7 @@
         {
           "ordinal": 5,
           "name": "upload_date",
-          "type_info": "Timestamp"
+          "type_info": "Timestamptz"
         }
       ],
       "parameters": {
@@ -318,7 +608,7 @@
         false,
         false,
         false,
-        false
+        true
       ]
     }
   },
@@ -330,6 +620,101 @@
         "Left": []
       },
       "nullable": []
+    }
+  },
+  "ead6a5de768956d37e893afc7c799db4e979b8e99953421a0ae4b3bc3cb23485": {
+    "query": "SELECT\n\t*\nFROM\n\timage i\nWHERE\n\ti.title % $1\n\tOR i.description % $1\nORDER BY\n\tSIMILARITY(i.title, $1) DESC;",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "id",
+          "type_info": "Uuid"
+        },
+        {
+          "ordinal": 1,
+          "name": "created",
+          "type_info": "Timestamptz"
+        },
+        {
+          "ordinal": 2,
+          "name": "upload_date",
+          "type_info": "Timestamptz"
+        },
+        {
+          "ordinal": 3,
+          "name": "title",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 4,
+          "name": "description",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 5,
+          "name": "app_user_id",
+          "type_info": "Uuid"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Text"
+        ]
+      },
+      "nullable": [
+        false,
+        false,
+        true,
+        false,
+        true,
+        false
+      ]
+    }
+  },
+  "f60a1e309c6e92416cbc2132ae470d36759d3dfd23242e86aa191822333ba570": {
+    "query": "UPDATE category\nSET category_name = $2\nWHERE\n\tid = $1;",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Text"
+        ]
+      },
+      "nullable": []
+    }
+  },
+  "f6fc0abd8f7816b433fccf68d8e0835b503cac710ec03c055668bc3131422f3a": {
+    "query": "SELECT *\nFROM category c\nWHERE c.id = $1;",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "id",
+          "type_info": "Uuid"
+        },
+        {
+          "ordinal": 1,
+          "name": "created",
+          "type_info": "Timestamptz"
+        },
+        {
+          "ordinal": 2,
+          "name": "category_name",
+          "type_info": "Text"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      },
+      "nullable": [
+        false,
+        false,
+        false
+      ]
     }
   }
 }
