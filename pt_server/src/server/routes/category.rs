@@ -7,11 +7,21 @@ use actix_web::{
     web::{self, ServiceConfig},
     HttpResponse,
 };
+use aide::openapi::v3::macros::api::define;
 use aide::openapi::v3::macros::api;
 use uuid::Uuid;
 
+const TAG_NAME: &str = "categories";
+
+define::tag! {
+    name(TAG_NAME),
+    description("Operations with image categories"),
+    display_name("Categories")
+}
+
 #[api]
 #[get("/categories")]
+#[tag(TAG_NAME)]
 #[response(200, GetCategoriesResponse)]
 async fn get_categories(
     _token: SessionToken,
@@ -38,6 +48,7 @@ async fn get_categories(
 
 #[api]
 #[post("/categories")]
+#[tag(TAG_NAME)]
 #[response(200, CreateCategoryResponse)]
 async fn create_category(
     token: SessionToken,
@@ -63,6 +74,7 @@ async fn create_category(
 
 #[api]
 #[put("/categories/{category_id}")]
+#[tag(TAG_NAME)]
 #[response(204)]
 #[response(404)]
 async fn rename_category(

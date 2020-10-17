@@ -13,10 +13,20 @@ use actix_web::{
     HttpResponse,
 };
 use aide::openapi::v3::macros::api;
+use aide::openapi::v3::macros::api::define;
+
+const TAG_NAME: &str = "auth";
+
+define::tag! {
+    name(TAG_NAME),
+    description("Authentication and authorization routes"),
+    display_name("Auth")
+}
 
 /// Login for existing users.
 #[api]
 #[post("/auth/login")]
+#[tag(TAG_NAME)]
 #[response(200, LoginResponse)]
 #[response(status(404), desc("the user was not found"))]
 #[response(status(403), desc("incorrect password"))]
@@ -39,6 +49,7 @@ async fn login(
 /// Register endpoint for new users.
 #[api]
 #[post("/auth/register")]
+#[tag(TAG_NAME)]
 #[response(204)]
 #[response(400, InvalidRegisterRequest)]
 async fn register(

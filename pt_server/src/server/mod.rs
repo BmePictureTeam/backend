@@ -65,7 +65,11 @@ pub fn configure_routes(config: &Config) -> impl FnOnce(&mut ServiceConfig) {
                     GenericError {
                         message: "An unexpected error happened".into(),
                     },
-                ));
+                ))
+                .transform(|mut api| {
+                    api.tags.sort_by(|a, b| a.name.cmp(&b.name));
+                    api
+                });
 
             app.service(
                 ReDoc::new()

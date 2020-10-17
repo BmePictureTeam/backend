@@ -343,9 +343,9 @@ dependencies = [
 
 [[package]]
 name = "aide"
-version = "0.1.4"
+version = "0.1.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ba72396666b7e73a0b046f983e5c70bd8e4fef6d27092efa2bdb8e0c722740a4"
+checksum = "25d5624800bdd09de78a09a16cd11b9aa5e5b11d6de5f08e589d7e391f524e7d"
 dependencies = [
  "actix-web",
  "aide-macros",
@@ -358,9 +358,9 @@ dependencies = [
 
 [[package]]
 name = "aide-macros"
-version = "0.1.1"
+version = "0.1.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "07d4ab3636a4ccaad322a4d026cc53409036e9018ceee94a72d61d489edc5127"
+checksum = "92ca813fb2056bb3289a637b7aec8e4dc2b548c5c5ddd0f9bd90f4b1695c8d70"
 dependencies = [
  "heck",
  "proc-macro-error",
@@ -368,6 +368,7 @@ dependencies = [
  "quote",
  "regex",
  "syn",
+ "tamasfe-macro-utils",
  "titlecase",
  "uuid",
 ]
@@ -2123,7 +2124,7 @@ dependencies = [
 [[package]]
 name = "sqlx"
 version = "0.4.0-beta.1"
-source = "git+https://github.com/launchbadge/sqlx.git#fd25a7530cf087e1529553ff854f192738db3461"
+source = "git+https://github.com/launchbadge/sqlx.git#96609d4fc80364d8183e44e58ac42a69b7b93d07"
 dependencies = [
  "sqlx-core",
  "sqlx-macros",
@@ -2132,7 +2133,7 @@ dependencies = [
 [[package]]
 name = "sqlx-core"
 version = "0.4.0-beta.1"
-source = "git+https://github.com/launchbadge/sqlx.git#fd25a7530cf087e1529553ff854f192738db3461"
+source = "git+https://github.com/launchbadge/sqlx.git#96609d4fc80364d8183e44e58ac42a69b7b93d07"
 dependencies = [
  "atoi",
  "base64 0.13.0",
@@ -2177,7 +2178,7 @@ dependencies = [
 [[package]]
 name = "sqlx-macros"
 version = "0.4.0-beta.1"
-source = "git+https://github.com/launchbadge/sqlx.git#fd25a7530cf087e1529553ff854f192738db3461"
+source = "git+https://github.com/launchbadge/sqlx.git#96609d4fc80364d8183e44e58ac42a69b7b93d07"
 dependencies = [
  "dotenv",
  "either",
@@ -2198,7 +2199,7 @@ dependencies = [
 [[package]]
 name = "sqlx-rt"
 version = "0.1.1"
-source = "git+https://github.com/launchbadge/sqlx.git#fd25a7530cf087e1529553ff854f192738db3461"
+source = "git+https://github.com/launchbadge/sqlx.git#96609d4fc80364d8183e44e58ac42a69b7b93d07"
 dependencies = [
  "actix-rt",
  "actix-threadpool",
@@ -2298,6 +2299,18 @@ name = "take_mut"
 version = "0.2.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "f764005d11ee5f36500a149ace24e00e3da98b0158b3e2d53a7495660d3f4d60"
+
+[[package]]
+name = "tamasfe-macro-utils"
+version = "0.1.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "9d45961f4a9644735232e64a1df5561ef4b357815e815ef3979c55efcb079ce1"
+dependencies = [
+ "proc-macro-error",
+ "proc-macro2",
+ "quote",
+ "syn",
+]
 
 [[package]]
 name = "tamasfe-schemars"

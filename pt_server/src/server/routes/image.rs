@@ -18,13 +18,23 @@ use actix_web::{
     web::{self, ServiceConfig},
     HttpRequest, HttpResponse,
 };
+use aide::openapi::v3::macros::api::define;
 use aide::openapi::v3::macros::api;
 use slog::{error, Logger};
 use std::io;
 use uuid::Uuid;
 
+const TAG_NAME: &str = "images";
+
+define::tag! {
+    name(TAG_NAME),
+    description("Operations with images"),
+    display_name("Images")
+}
+
 #[api]
 #[post("/images")]
+#[tag(TAG_NAME)]
 #[response(200, CreateImageResponse)]
 #[response(400, GenericError)]
 async fn create_image(
@@ -61,6 +71,7 @@ async fn create_image(
 
 #[api]
 #[get("/images")]
+#[tag(TAG_NAME)]
 #[response(200, SearchImagesResponse)]
 async fn search_images(
     _token: SessionToken,
@@ -91,6 +102,7 @@ async fn search_images(
 
 #[api]
 #[post("/images/{image_id}")]
+#[tag(TAG_NAME)]
 #[response(204)]
 #[response(400, GenericError)]
 async fn upload_image(
@@ -119,6 +131,7 @@ async fn upload_image(
 
 #[api]
 #[get("/images/{image_id}")]
+#[tag(TAG_NAME)]
 #[response(status(200), content_type("application/octet-stream"))]
 #[response(404)]
 async fn download_image(
@@ -147,6 +160,7 @@ async fn download_image(
 
 #[api]
 #[put("/images/{image_id}/rating")]
+#[tag(TAG_NAME)]
 #[response(204)]
 #[response(
     status(404),
@@ -188,6 +202,7 @@ async fn rate_image(
 
 #[api]
 #[get("/images/{image_id}/rating")]
+#[tag(TAG_NAME)]
 #[response(200, GetImageRatingResponse)]
 #[response(404)]
 async fn get_image_rating(
