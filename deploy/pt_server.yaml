@@ -15,12 +15,14 @@ spec:
       containers:
         - name: pt-server
           imagePullPolicy: Always
-          image: docker.cicum.icu/temalab/pt_server
+          image: docker.cicum.icu/temalab/pt_server:images
           env:
               - name: PT_PORT
                 value: "80"
               - name: PT_HOST
                 value: "0.0.0.0"
+              - name: PT_DATABASE_URL
+                value: $DB_URL
           resources:
             limits:
               memory: "256Mi"
