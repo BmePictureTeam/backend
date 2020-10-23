@@ -45,6 +45,7 @@ pub trait ImageService: Service {
     async fn get_categories(&self) -> Result<Vec<CategoryExt>, GetCategoriesError>;
     async fn create_category(&self, name: &str) -> Result<Uuid, CreateCategoryError>;
     async fn rename_category(&self, id: Uuid, name: &str) -> Result<(), RenameCategoryError>;
+    async fn delete_category(&self, id: Uuid) -> Result<(), DeleteCategoryError>;
 }
 dyn_clone::clone_trait_object!(ImageService);
 
@@ -335,6 +336,25 @@ impl ImageService for DefaultImageService {
                 "error" => e.to_string()
             );
             RenameCategoryError::Unexpected
+        })
+    }
+
+    async fn delete_category(&self, id: Uuid) -> Result<(), DeleteCategoryError> {
+        let category = Category::by_id(id, &self.pool)
+            .await
+            .map_err(|e| {
+                error!(&self.logger, "unexpected database error";
+                    "error" => e.to_string()
+                );
+                DeleteCategoryError::Unexpected
+            })?
+            .ok_or(DeleteCategoryError::CategoryNotFound)?;
+
+        category.delete(&self.pool).await.map_err(|e| {
+            error!(&self.logger, "unexpected database error";
+                "error" => e.to_string()
+            );
+            DeleteCategoryError::Unexpected
         })
     }
 }

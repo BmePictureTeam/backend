@@ -3,7 +3,7 @@ use crate::{
     services::ImageService,
 };
 use actix_web::{
-    get, post, put,
+    get, post, put, delete,
     web::{self, ServiceConfig},
     HttpResponse,
 };
@@ -100,10 +100,38 @@ async fn rename_category(
     }
 }
 
+#[api]
+#[delete("/categories/{category_id}")]
+#[tag(TAG_NAME)]
+#[response(204)]
+#[response(404)]
+async fn delete_category(
+    token: SessionToken,
+    web::Path((category_id,)): web::Path<(Uuid,)>,
+    image_service: web::Data<Box<dyn ImageService>>,
+) -> HttpResponse {
+    if !token.user_info().admin {
+        return HttpResponse::Forbidden().json(GenericError {
+            message: DeleteCategoryError::NotAllowed.to_string(),
+        });
+    }
+
+    match image_service.delete_category(category_id).await {
+        Ok(_) => HttpResponse::NoContent().finish(),
+        Err(err) => match err {
+            DeleteCategoryError::Unexpected => {
+                HttpResponse::InternalServerError().json(GenericError::default())
+            }
+            _ => unreachable!(),
+        },
+    }
+}
+
 pub fn configure_routes(_config: &Config) -> impl FnOnce(&mut ServiceConfig) {
     move |app: &mut ServiceConfig| {
         app.service(get_categories);
         app.service(create_category);
         app.service(rename_category);
+        app.service(delete_category);
     }
 }

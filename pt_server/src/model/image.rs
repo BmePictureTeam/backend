@@ -146,3 +146,13 @@ pub enum RenameCategoryError {
     #[error("there was an unexpected error")]
     Unexpected,
 }
+
+#[derive(Debug, Error)]
+pub enum DeleteCategoryError {
+    #[error("only admins are allowed to create categories")]
+    NotAllowed,
+    #[error("there category was not found")]
+    CategoryNotFound,
+    #[error("there was an unexpected error")]
+    Unexpected,
+}

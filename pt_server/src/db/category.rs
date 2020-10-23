@@ -41,6 +41,20 @@ impl Category {
             .fetch_all(pool)
             .await
     }
+
+    pub async fn delete(&self, pool: &PgPool) -> Result<(), sqlx::Error> {
+        let mut tx = pool.begin().await?;
+
+        query_file!("queries/category/remove_images.sql", self.id)
+            .execute(&mut tx)
+            .await?;
+
+        query_file!("queries/category/delete.sql", self.id)
+            .execute(&mut tx)
+            .await?;
+
+        tx.commit().await
+    }
 }
 
 impl Category {
@@ -60,9 +74,9 @@ impl Category {
 
     pub async fn save(&self, pool: &PgPool) -> Result<(), sqlx::Error> {
         query_file!("queries/category/update.sql", &self.id, &self.category_name)
-        .execute(pool)
-        .await
-        .map(|_| ())
+            .execute(pool)
+            .await
+            .map(|_| ())
     }
 }
 

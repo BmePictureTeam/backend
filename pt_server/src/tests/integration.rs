@@ -130,6 +130,11 @@ impl ImageService for TestImageService {
         // Checks or mocks here.
         self.0.rename_category(id, name).await
     }
+
+    async fn delete_category(&self, id: Uuid) -> Result<(), DeleteCategoryError> {
+        // Checks or mocks here.
+        self.0.delete_category(id).await
+    }
 }
 
 pub fn configure_services(
