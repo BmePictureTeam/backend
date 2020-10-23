@@ -65,6 +65,7 @@ where
     fn call(&mut self, req: ServiceRequest) -> Self::Future {
         let path = req.path().to_string();
         let start = OffsetDateTime::now_utc();
+        let method = req.method().to_string();
         let log = self.logger.clone();
 
         req.extensions_mut().insert(String::new());
@@ -88,6 +89,7 @@ where
                 (OffsetDateTime::now_utc() - start).whole_nanoseconds() as f32 / 1_000_000f32;
 
             info!(log, "request";
+                "method" => method,
                 "path" => path,
                 "status" => res.status().as_u16(),
                 "time" => format!("{}ms", time_ms),
