@@ -74,10 +74,6 @@ impl ImageService for DefaultImageService {
         image: NewImage,
         categories: &[Uuid],
     ) -> Result<Uuid, CreateImageError> {
-        if categories.is_empty() {
-            return Err(CreateImageError::NoCategory);
-        }
-
         let db_categories =
             futures::future::join_all(categories.iter().map(|id| Category::by_id(*id, &self.pool)))
                 .await

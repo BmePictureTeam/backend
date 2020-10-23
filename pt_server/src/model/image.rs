@@ -19,8 +19,6 @@ pub struct CreateImageResponse {
 
 #[derive(Debug, Error)]
 pub enum CreateImageError {
-    #[error("the image must have at least one category")]
-    NoCategory,
     #[error(r#"the the image category "{0}" was not found"#)]
     CategoryNotFound(Uuid),
     #[error("there was an unexpected error")]

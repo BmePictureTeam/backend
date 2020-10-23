@@ -60,7 +60,7 @@ async fn create_image(
                     message: err.to_string(),
                 })
             }
-            CreateImageError::NoCategory | CreateImageError::CategoryNotFound(_) => {
+            CreateImageError::CategoryNotFound(_) => {
                 HttpResponse::BadRequest().json(GenericError {
                     message: err.to_string(),
                 })
