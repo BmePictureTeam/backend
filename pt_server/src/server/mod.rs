@@ -22,8 +22,8 @@ pub async fn run(config: Config, logger: Logger, pool: sqlx::PgPool) -> anyhow::
 
     HttpServer::new(move || {
         App::new()
+            .wrap(Cors::new().finish())
             .wrap(middleware::Logger::new(logger.clone()))
-            .wrap(Cors::new().allowed_header("All").finish())
             .data(logger.clone())
             .configure(configure_services(&config, logger.clone(), pool.clone()))
             .configure(configure_routes(&config))
