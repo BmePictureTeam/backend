@@ -18,8 +18,8 @@ use actix_web::{
     web::{self, ServiceConfig},
     HttpRequest, HttpResponse,
 };
-use aide::openapi::v3::macros::api::define;
 use aide::openapi::v3::macros::api;
+use aide::openapi::v3::macros::api::define;
 use slog::{error, Logger};
 use std::io;
 use uuid::Uuid;
@@ -86,6 +86,7 @@ async fn search_images(
             images: images
                 .into_iter()
                 .map(|(i, c)| Image {
+                    id: i.id,
                     title: i.title,
                     description: i.description,
                     categories: c.into_iter().map(|c| c.id).collect(),

@@ -7,6 +7,7 @@ use actix_files::NamedFile;
 use actix_multipart::Multipart;
 use async_trait::async_trait;
 use futures::{future::join_all, StreamExt, TryStreamExt};
+use regex::Regex;
 use slog::{error, Logger};
 use sqlx::PgPool;
 use std::{ffi::OsString, path::Path};
@@ -16,6 +17,8 @@ use tokio::{
     io::AsyncWriteExt,
 };
 use uuid::Uuid;
+
+pub const CATEGORY_NAME_PATTERN: &str = "[A-Za-z]+";
 
 #[async_trait(?Send)]
 pub trait ImageService: Service {
@@ -310,6 +313,30 @@ impl ImageService for DefaultImageService {
     }
 
     async fn create_category(&self, name: &str) -> Result<Uuid, CreateCategoryError> {
+        let re = Regex::new(CATEGORY_NAME_PATTERN).unwrap();
+
+        if !re.is_match(name) {
+            return Err(CreateCategoryError::InvalidName(
+                CATEGORY_NAME_PATTERN.into(),
+            ));
+        }
+
+        let categories = Category::all(&self.pool).await.map_err(|e| {
+            error!(&self.logger, "unexpected database error";
+                "error" => e.to_string()
+            );
+            CreateCategoryError::Unexpected
+        })?;
+
+        let lc_name = name.to_lowercase();
+
+        if categories
+            .iter()
+            .any(|c| c.category_name.to_lowercase() == lc_name)
+        {
+            return Err(CreateCategoryError::AlreadyExists);
+        }
+
         Category::new(name, &self.pool).await.map_err(|e| {
             error!(&self.logger, "unexpected database error";
                 "error" => e.to_string()
@@ -319,6 +346,14 @@ impl ImageService for DefaultImageService {
     }
 
     async fn rename_category(&self, id: Uuid, name: &str) -> Result<(), RenameCategoryError> {
+        let re = Regex::new(CATEGORY_NAME_PATTERN).unwrap();
+
+        if !re.is_match(name) {
+            return Err(RenameCategoryError::InvalidName(
+                CATEGORY_NAME_PATTERN.into(),
+            ));
+        }
+
         let mut category = Category::by_id(id, &self.pool)
             .await
             .map_err(|e| {
@@ -328,6 +363,22 @@ impl ImageService for DefaultImageService {
                 RenameCategoryError::Unexpected
             })?
             .ok_or(RenameCategoryError::CategoryNotFound)?;
+
+        let categories = Category::all(&self.pool).await.map_err(|e| {
+            error!(&self.logger, "unexpected database error";
+                "error" => e.to_string()
+            );
+            RenameCategoryError::Unexpected
+        })?;
+
+        let lc_name = name.to_lowercase();
+
+        if categories
+            .iter()
+            .any(|c| c.category_name.to_lowercase() == lc_name)
+        {
+            return Err(RenameCategoryError::AlreadyExists);
+        }
 
         category.category_name = name.into();
 

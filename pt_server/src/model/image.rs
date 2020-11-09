@@ -34,6 +34,7 @@ pub struct SearchImagesQuery {
 
 #[api]
 pub struct Image {
+    pub id: Uuid,
     pub title: String,
     pub description: Option<String>,
     pub categories: Vec<Uuid>,
@@ -127,6 +128,10 @@ pub struct CreateCategoryResponse {
 pub enum CreateCategoryError {
     #[error("only admins are allowed to create categories")]
     NotAllowed,
+    #[error("the category name must match the following pattern: {0}")]
+    InvalidName(String),
+    #[error("the category already exists")]
+    AlreadyExists,
     #[error("there was an unexpected error")]
     Unexpected,
 }
@@ -136,13 +141,16 @@ pub struct RenameCategoryRequest {
     pub name: String,
 }
 
-
 #[derive(Debug, Error)]
 pub enum RenameCategoryError {
     #[error("only admins are allowed to create categories")]
     NotAllowed,
     #[error("there category was not found")]
     CategoryNotFound,
+    #[error("the category name must match the following pattern: {0}")]
+    InvalidName(String),
+    #[error("the category already exists")]
+    AlreadyExists,
     #[error("there was an unexpected error")]
     Unexpected,
 }
