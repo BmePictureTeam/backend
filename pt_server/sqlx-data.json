@@ -1,5 +1,29 @@
 {
   "db": "PostgreSQL",
+  "0e55810a93f8d34a742390f0c12f0152e81491b9f0ba4f4459805bacff0034e6": {
+    "query": "DELETE FROM category\nWHERE category.id = $1;",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      },
+      "nullable": []
+    }
+  },
+  "26d17c471bde5615d564319b683191fcaa2cd9ab801fc67d58891aa58432fc92": {
+    "query": "DELETE FROM image_category\nWHERE category_id = $1;",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      },
+      "nullable": []
+    }
+  },
   "2f184b65b312c966ba82fe68befa2677c79e8acd986eb924320e5c4a41b7ca7c": {
     "query": "SELECT\n\t*\nFROM\n\timage i\nWHERE\n\ti.app_user_id = $1;",
     "describe": {
@@ -394,16 +418,6 @@
       ]
     }
   },
-  "b1314828d688925c0f6a8cfa7bb843b36cc0409407cae7213b0fb6ab99c1390b": {
-    "query": "\n    UPDATE app_user\n    SET is_admin = TRUE\n    WHERE \n        app_user.email = 'admin@admin.admin'\n    ",
-    "describe": {
-      "columns": [],
-      "parameters": {
-        "Left": []
-      },
-      "nullable": []
-    }
-  },
   "bd8060873657a19b475e4f7578769c21bac66a4fa74765369ba45ec3a6dd878d": {
     "query": "SELECT *\nFROM app_user\nWHERE id = $1;",
     "describe": {
@@ -442,73 +456,6 @@
       "nullable": [
         false,
         false,
-        false,
-        false,
-        false
-      ]
-    }
-  },
-  "c1e5be1fcc50796b854c6c921d5f95712f2c7f9d70365416b27158bc8f210025": {
-    "query": "INSERT\n\tINTO\n\timage (app_user_id, upload_date, title, description)\nVALUES ($1, $2, $3, $4) RETURNING id;",
-    "describe": {
-      "columns": [
-        {
-          "ordinal": 0,
-          "name": "id",
-          "type_info": "Uuid"
-        }
-      ],
-      "parameters": {
-        "Left": [
-          "Uuid",
-          "Timestamp",
-          "Text",
-          "Text"
-        ]
-      },
-      "nullable": [
-        false
-      ]
-    }
-  },
-  "c4a96a34d143c6a696728940433e33e7adf22e27c0e55e28fd79e9cbd7d88cf2": {
-    "query": "SELECT\n\tcreated, description, id, title, upload_date\nFROM\n\timage i\nWHERE\n\ti.app_user_id = $1;",
-    "describe": {
-      "columns": [
-        {
-          "ordinal": 0,
-          "name": "created",
-          "type_info": "Timestamp"
-        },
-        {
-          "ordinal": 1,
-          "name": "description",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 2,
-          "name": "id",
-          "type_info": "Uuid"
-        },
-        {
-          "ordinal": 3,
-          "name": "title",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 4,
-          "name": "upload_date",
-          "type_info": "Timestamp"
-        }
-      ],
-      "parameters": {
-        "Left": [
-          "Uuid"
-        ]
-      },
-      "nullable": [
-        false,
-        true,
         false,
         false,
         false
@@ -560,116 +507,6 @@
         ]
       },
       "nullable": []
-    }
-  },
-  "de1645d68c9745c90345de6ff09bbb10c560cca2fad5aa152c0f9b796dd2d529": {
-    "query": "SELECT created,\n\tdescription,\n\tid,\n\tapp_user_id,\n\ttitle,\n\tupload_date\nFROM image i\nWHERE i.id = $1;",
-    "describe": {
-      "columns": [
-        {
-          "ordinal": 0,
-          "name": "created",
-          "type_info": "Timestamptz"
-        },
-        {
-          "ordinal": 1,
-          "name": "description",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 2,
-          "name": "id",
-          "type_info": "Uuid"
-        },
-        {
-          "ordinal": 3,
-          "name": "app_user_id",
-          "type_info": "Uuid"
-        },
-        {
-          "ordinal": 4,
-          "name": "title",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 5,
-          "name": "upload_date",
-          "type_info": "Timestamptz"
-        }
-      ],
-      "parameters": {
-        "Left": [
-          "Uuid"
-        ]
-      },
-      "nullable": [
-        false,
-        true,
-        false,
-        false,
-        false,
-        true
-      ]
-    }
-  },
-  "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855": {
-    "query": "",
-    "describe": {
-      "columns": [],
-      "parameters": {
-        "Left": []
-      },
-      "nullable": []
-    }
-  },
-  "ead6a5de768956d37e893afc7c799db4e979b8e99953421a0ae4b3bc3cb23485": {
-    "query": "SELECT\n\t*\nFROM\n\timage i\nWHERE\n\ti.title % $1\n\tOR i.description % $1\nORDER BY\n\tSIMILARITY(i.title, $1) DESC;",
-    "describe": {
-      "columns": [
-        {
-          "ordinal": 0,
-          "name": "id",
-          "type_info": "Uuid"
-        },
-        {
-          "ordinal": 1,
-          "name": "created",
-          "type_info": "Timestamptz"
-        },
-        {
-          "ordinal": 2,
-          "name": "upload_date",
-          "type_info": "Timestamptz"
-        },
-        {
-          "ordinal": 3,
-          "name": "title",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 4,
-          "name": "description",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 5,
-          "name": "app_user_id",
-          "type_info": "Uuid"
-        }
-      ],
-      "parameters": {
-        "Left": [
-          "Text"
-        ]
-      },
-      "nullable": [
-        false,
-        false,
-        true,
-        false,
-        true,
-        false
-      ]
     }
   },
   "f60a1e309c6e92416cbc2132ae470d36759d3dfd23242e86aa191822333ba570": {

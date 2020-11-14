@@ -85,11 +85,15 @@ async fn search_images(
         Ok(images) => HttpResponse::Ok().json(SearchImagesResponse {
             images: images
                 .into_iter()
-                .map(|(i, c)| Image {
-                    id: i.id,
-                    title: i.title,
-                    description: i.description,
-                    categories: c.into_iter().map(|c| c.id).collect(),
+                .filter_map(|(i, c)| match i.upload_date {
+                    Some(date) => Some(Image {
+                        id: i.id,
+                        title: i.title,
+                        description: i.description,
+                        categories: c.into_iter().map(|c| c.id).collect(),
+                        date,
+                    }),
+                    None => None,
                 })
                 .collect(),
         }),

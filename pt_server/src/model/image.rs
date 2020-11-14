@@ -1,6 +1,6 @@
 use aide::openapi::v3::macros::api;
 use thiserror::Error;
-use time::Duration;
+use time::{Duration, OffsetDateTime};
 use uuid::Uuid;
 
 #[api]
@@ -38,6 +38,7 @@ pub struct Image {
     pub title: String,
     pub description: Option<String>,
     pub categories: Vec<Uuid>,
+    pub date: OffsetDateTime
 }
 
 #[api]
