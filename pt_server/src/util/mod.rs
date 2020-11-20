@@ -1,6 +1,6 @@
 use rand::{distributions::Alphanumeric, thread_rng, Rng};
 use regex::Regex;
-use serde::{Serialize, Serializer};
+use serde::{de::Error, Deserializer, Deserialize, Serialize, Serializer};
 use time::OffsetDateTime;
 
 pub const EMAIL_REGEX: &str = r#"^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$"#;
@@ -27,4 +27,13 @@ where
     S: Serializer,
 {
     date.format(time::Format::Rfc3339).serialize(ser)
+}
+
+pub fn deserialize_rfc3339<'de, D>(de: D) -> Result<OffsetDateTime, D::Error>
+where
+    D: Deserializer<'de>,
+{
+    let s: String = String::deserialize(de)?;
+    Ok(OffsetDateTime::parse(s, time::Format::Rfc3339)
+        .map_err(|e| D::Error::custom(&format!("invalid date: {}", e)))?)
 }

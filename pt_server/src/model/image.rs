@@ -39,6 +39,7 @@ pub struct Image {
     pub description: Option<String>,
     pub categories: Vec<Uuid>,
     #[serde(serialize_with = "crate::util::serialize_rfc3339")]
+    #[serde(deserialize_with = "crate::util::deserialize_rfc3339")]
     pub date: OffsetDateTime
 }
 

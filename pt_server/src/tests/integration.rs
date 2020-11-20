@@ -371,6 +371,24 @@ async fn whole_app() {
             test::read_body(upload_image_res).await
         );
 
+        // Image search
+        let search_images_req = test::TestRequest::get()
+            .uri("/images")
+            .header("Authorization", format!("Bearer {}", token))
+            .to_request();
+        let search_images_res = test::call_service(&mut app, search_images_req).await;
+        assert!(
+            search_images_res.status() == 200,
+            "got {}, {:?}",
+            search_images_res.status().as_u16(),
+            test::read_body(search_images_res).await
+        );
+        let search_images_res_data: SearchImagesResponse =
+            test::read_body_json(search_images_res).await;
+
+        assert!(search_images_res_data.images.len() == 1);
+
+        // Finally image download
         let download_image_req = test::TestRequest::get()
             .uri(&format!("/images/{}", image_id))
             .header("Authorization", format!("Bearer {}", token))
