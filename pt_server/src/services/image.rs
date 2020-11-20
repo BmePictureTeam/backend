@@ -246,7 +246,16 @@ impl ImageService for DefaultImageService {
                 SearchImagesError::Unexpected
             })?;
 
-        Ok(images.into_iter().zip(categories).collect())
+        Ok(images
+            .into_iter()
+            .zip(categories)
+            // Filter only uploaded images
+            .filter(|(i, _)| {
+                Path::new(&i.id.to_hyphenated().to_string())
+                    .with_extension("png")
+                    .exists()
+            })
+            .collect())
     }
 
     async fn rate_image(
