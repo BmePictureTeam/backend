@@ -62,21 +62,32 @@ impl Image {
     }
 
     pub async fn search(
-        s: &str,
+        s: Option<&str>,
         offset: Option<i64>,
         limit: Option<i64>,
         pool: &PgPool,
     ) -> Result<Vec<Image>, sqlx::Error> {
-        query_file_as!(
-            Image,
-            "queries/image/search.sql",
-            s,
-            offset.unwrap_or(0),
-            limit
-        )
-        .fetch_all(pool)
-        .await
-        .map(|images| images.into_iter().map(Into::into).collect())
+        match s {
+            Some(s) => query_file_as!(
+                Image,
+                "queries/image/search.sql",
+                s,
+                offset.unwrap_or(0),
+                limit.unwrap_or(10)
+            )
+            .fetch_all(pool)
+            .await
+            .map(|images| images.into_iter().map(Into::into).collect()),
+            None => query_file_as!(
+                Image,
+                "queries/image/search_no_str.sql",
+                offset.unwrap_or(0),
+                limit.unwrap_or(10)
+            )
+            .fetch_all(pool)
+            .await
+            .map(|images| images.into_iter().map(Into::into).collect()),
+        }
     }
 }
 

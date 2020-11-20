@@ -38,8 +38,10 @@ pub struct Image {
     pub title: String,
     pub description: Option<String>,
     pub categories: Vec<Uuid>,
+    #[serde(serialize_with = "crate::util::serialize_rfc3339")]
     pub date: OffsetDateTime
 }
+
 
 #[api]
 pub struct SearchImagesResponse {

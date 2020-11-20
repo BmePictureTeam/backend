@@ -222,7 +222,7 @@ impl ImageService for DefaultImageService {
         limit: Option<u64>,
     ) -> Result<Vec<(Image, Vec<Category>)>, SearchImagesError> {
         let images = Image::search(
-            search.unwrap_or(""),
+            search,
             offset.map(|v| v as _),
             limit.map(|v| v as _),
             &self.pool,

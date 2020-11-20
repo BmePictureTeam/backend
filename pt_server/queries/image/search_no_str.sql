@@ -1,0 +1,6 @@
+SELECT
+	*
+FROM
+	image i
+OFFSET $1
+LIMIT $2;
