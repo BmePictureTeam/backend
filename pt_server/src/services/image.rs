@@ -251,7 +251,8 @@ impl ImageService for DefaultImageService {
             .zip(categories)
             // Filter only uploaded images
             .filter(|(i, _)| {
-                Path::new(&i.id.to_hyphenated().to_string())
+                Path::new(&self.config.image_storage_path)
+                    .join(&i.id.to_hyphenated().to_string())
                     .with_extension("png")
                     .exists()
             })
