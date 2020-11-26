@@ -173,7 +173,7 @@ async fn get_image(
 }
 
 #[api]
-#[get("/images/{image_id}")]
+#[get("/images/{image_id}/download")]
 #[tag(TAG_NAME)]
 #[response(status(200), content_type("application/octet-stream"))]
 #[response(404)]
