@@ -30,6 +30,7 @@ pub trait ImageService: Service {
     ) -> Result<Uuid, CreateImageError>;
     async fn save_image(&self, id: Uuid, payload: Multipart) -> Result<(), UploadImageError>;
     async fn get_image(&self, id: Uuid) -> Result<NamedFile, std::io::Error>;
+    async fn get_image_info(&self, id: Uuid) -> Result<(Image, Vec<Category>), GetImageInfoError>;
     async fn search_images(
         &self,
         search: Option<&str>,
@@ -417,5 +418,26 @@ impl ImageService for DefaultImageService {
             );
             DeleteCategoryError::Unexpected
         })
+    }
+
+    async fn get_image_info(&self, id: Uuid) -> Result<(Image, Vec<Category>), GetImageInfoError> {
+        let image = Image::by_id(id, &self.pool)
+            .await
+            .map_err(|e| {
+                error!(&self.logger, "unexpected database error";
+                    "error" => e.to_string()
+                );
+                GetImageInfoError::Unexpected
+            })?
+            .ok_or(GetImageInfoError::NotFound)?;
+
+        let categories = image.categories(&self.pool).await.map_err(|e| {
+            error!(&self.logger, "unexpected database error";
+                "error" => e.to_string()
+            );
+            GetImageInfoError::Unexpected
+        })?;
+
+        Ok((image, categories))
     }
 }

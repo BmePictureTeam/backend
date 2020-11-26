@@ -4,8 +4,8 @@ use crate::{
     model::error::GenericError,
     model::image::{
         CreateImageError, CreateImageRequest, CreateImageResponse, GetImageRatingResponse,
-        GetImageRatingsError, Image, RateImageError, RateImageRequest, SearchImagesError,
-        SearchImagesQuery, SearchImagesResponse, UploadImageError,
+        GetImageRatingsError, GetImageResponse, Image, RateImageError, RateImageRequest,
+        SearchImagesError, SearchImagesQuery, SearchImagesResponse, UploadImageError,
     },
     server::extractors::SessionToken,
     services::image::ImageService,
@@ -126,6 +126,44 @@ async fn upload_image(
                 message: err.to_string(),
             }),
             UploadImageError::Unexpected => {
+                HttpResponse::InternalServerError().json(GenericError {
+                    message: err.to_string(),
+                })
+            }
+        },
+    }
+}
+
+#[api]
+#[get("/images/{image_id}")]
+#[tag(TAG_NAME)]
+#[response(200, GetImageResponse)]
+#[response(400, GenericError)]
+async fn get_image(
+    _token: SessionToken,
+    web::Path((image_id,)): web::Path<(Uuid,)>,
+    image_service: web::Data<Box<dyn ImageService>>,
+) -> HttpResponse {
+    match image_service.get_image_info(image_id).await {
+        Ok((i, c)) => match i.upload_date {
+            Some(date) => HttpResponse::Ok().json(Image {
+                id: i.id,
+                title: i.title,
+                description: i.description,
+                categories: c.into_iter().map(|c| c.id).collect(),
+                date,
+            }),
+            None => HttpResponse::NotFound().json(GenericError {
+                message: "image was not found".into(),
+            }),
+        },
+        Err(err) => match err {
+            crate::model::image::GetImageInfoError::NotFound => {
+                HttpResponse::NotFound().json(GenericError {
+                    message: err.to_string(),
+                })
+            }
+            crate::model::image::GetImageInfoError::Unexpected => {
                 HttpResponse::InternalServerError().json(GenericError {
                     message: err.to_string(),
                 })

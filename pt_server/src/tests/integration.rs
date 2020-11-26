@@ -135,6 +135,11 @@ impl ImageService for TestImageService {
         // Checks or mocks here.
         self.0.delete_category(id).await
     }
+
+    async fn get_image_info(&self, id: Uuid) -> Result<(db::image::Image, Vec<db::category::Category>), GetImageInfoError> {
+        // Checks or mocks here.
+        self.0.get_image_info(id).await
+    }
 }
 
 pub fn configure_services(

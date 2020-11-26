@@ -49,8 +49,21 @@ pub struct SearchImagesResponse {
     pub images: Vec<Image>,
 }
 
+#[api]
+pub struct GetImageResponse {
+    pub image: Image,
+}
+
 #[derive(Debug, Error)]
 pub enum SearchImagesError {
+    #[error("there was an unexpected error")]
+    Unexpected,
+}
+
+#[derive(Debug, Error)]
+pub enum GetImageInfoError {
+    #[error("the image was not found")]
+    NotFound,
     #[error("there was an unexpected error")]
     Unexpected,
 }
