@@ -275,6 +275,7 @@ pub fn configure_routes(_config: &Config) -> impl FnOnce(&mut ServiceConfig) {
     move |app: &mut ServiceConfig| {
         app.service(create_image);
         app.service(upload_image);
+        app.service(get_image);
         app.service(download_image);
         app.service(search_images);
         app.service(rate_image);
