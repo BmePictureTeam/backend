@@ -384,6 +384,38 @@
       ]
     }
   },
+  "87f95fbcaf4ba4901f2b3913d49b376887d20615aebf5e5fb08a7c3aaf705eaa": {
+    "query": "SELECT c.id,\n\tc.created,\n\tc.category_name\nFROM category c\nWHERE EXISTS (\n\t\tSELECT ic.category_id\n\t\tFROM image_category ic\n\t\tWHERE ic.image_id = $1\n\t\t\tAND ic.category_id = c.id\n\t);",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "id",
+          "type_info": "Uuid"
+        },
+        {
+          "ordinal": 1,
+          "name": "created",
+          "type_info": "Timestamptz"
+        },
+        {
+          "ordinal": 2,
+          "name": "category_name",
+          "type_info": "Text"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      },
+      "nullable": [
+        false,
+        false,
+        false
+      ]
+    }
+  },
   "8ba030f9612256c898a1c6d4a3aa966df6c60b3b4212b5ffef2b78e4bff54d90": {
     "query": "SELECT *\nFROM image i\nWHERE i.id = $1;",
     "describe": {

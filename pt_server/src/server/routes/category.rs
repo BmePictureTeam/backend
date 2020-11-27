@@ -3,12 +3,12 @@ use crate::{
     services::ImageService,
 };
 use actix_web::{
-    get, post, put, delete,
+    delete, get, post, put,
     web::{self, ServiceConfig},
     HttpResponse,
 };
-use aide::openapi::v3::macros::api::define;
 use aide::openapi::v3::macros::api;
+use aide::openapi::v3::macros::api::define;
 use uuid::Uuid;
 
 const TAG_NAME: &str = "categories";
@@ -67,7 +67,16 @@ async fn create_category(
             CreateCategoryError::Unexpected => {
                 HttpResponse::InternalServerError().json(GenericError::default())
             }
-            _ => unreachable!(),
+            CreateCategoryError::AlreadyExists => HttpResponse::BadRequest().json(GenericError {
+                message: err.to_string(),
+            }),
+
+            CreateCategoryError::NotAllowed => HttpResponse::Forbidden().json(GenericError {
+                message: err.to_string(),
+            }),
+            CreateCategoryError::InvalidName(_) => HttpResponse::BadRequest().json(GenericError {
+                message: err.to_string(),
+            }),
         },
     }
 }

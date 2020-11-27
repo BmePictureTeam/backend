@@ -146,12 +146,14 @@ async fn get_image(
 ) -> HttpResponse {
     match image_service.get_image_info(image_id).await {
         Ok((i, c)) => match i.upload_date {
-            Some(date) => HttpResponse::Ok().json(Image {
-                id: i.id,
-                title: i.title,
-                description: i.description,
-                categories: c.into_iter().map(|c| c.id).collect(),
-                date,
+            Some(date) => HttpResponse::Ok().json(GetImageResponse {
+                image: Image {
+                    id: i.id,
+                    title: i.title,
+                    description: i.description,
+                    categories: c.into_iter().map(|c| c.id).collect(),
+                    date,
+                },
             }),
             None => HttpResponse::NotFound().json(GenericError {
                 message: "image was not found".into(),
