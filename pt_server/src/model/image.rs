@@ -181,3 +181,20 @@ pub enum DeleteCategoryError {
     #[error("there was an unexpected error")]
     Unexpected,
 }
+
+#[api]
+pub struct UserRating {
+    pub name: String,
+    pub average_rating: f64
+}
+
+#[derive(Debug, Error)]
+pub enum GetUserRatingsError {
+    #[error("there was an unexpected error")]
+    Unexpected,
+}
+
+#[api]
+pub struct GetUserRatingsResponse {
+    pub ratings: Vec<UserRating>
+}

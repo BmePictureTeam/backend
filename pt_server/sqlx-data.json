@@ -1,5 +1,29 @@
 {
   "db": "PostgreSQL",
+  "0e1ed38d1c2ca3b6df35369d4f42df299d73492f68feae43315624f816865353": {
+    "query": "SELECT\n\tCAST (AVG(rating) AS FLOAT) AS average_rating,\n\tau.email AS email\nFROM\n\trating r\nINNER JOIN image i ON\n\tr.image_id = i.id\nINNER JOIN app_user au ON\n\tau.id = i.app_user_id\nGROUP BY email\nORDER BY average_rating;",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "average_rating",
+          "type_info": "Float8"
+        },
+        {
+          "ordinal": 1,
+          "name": "email",
+          "type_info": "Text"
+        }
+      ],
+      "parameters": {
+        "Left": []
+      },
+      "nullable": [
+        null,
+        false
+      ]
+    }
+  },
   "0e55810a93f8d34a742390f0c12f0152e81491b9f0ba4f4459805bacff0034e6": {
     "query": "DELETE FROM category\nWHERE category.id = $1;",
     "describe": {
@@ -501,6 +525,30 @@
       ]
     }
   },
+  "a14814236927409d6eb5438867dc077d8768ce1ea2fb2c7d6b8e21bdca01fb4f": {
+    "query": "SELECT\n\tCAST (AVG(rating) AS FLOAT) AS average_rating,\n\tau.email AS email\nFROM\n\trating r\nINNER JOIN image i ON\n\tr.image_id = r.image_id\nINNER JOIN app_user au ON\n\tau.id = i.app_user_id\nGROUP BY email\nORDER BY average_rating;",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "average_rating",
+          "type_info": "Float8"
+        },
+        {
+          "ordinal": 1,
+          "name": "email",
+          "type_info": "Text"
+        }
+      ],
+      "parameters": {
+        "Left": []
+      },
+      "nullable": [
+        null,
+        false
+      ]
+    }
+  },
   "bd8060873657a19b475e4f7578769c21bac66a4fa74765369ba45ec3a6dd878d": {
     "query": "SELECT *\nFROM app_user\nWHERE id = $1;",
     "describe": {
@@ -539,38 +587,6 @@
       "nullable": [
         false,
         false,
-        false,
-        false,
-        false
-      ]
-    }
-  },
-  "c8a48523256d9f5854059c168c7dc0b8e681ebe630f9d9c654064ee06c3f576b": {
-    "query": "SELECT\n\tc.id,\n\tc.created,\n\tc.category_name\nFROM\n\tcategory c\nINNER JOIN image_category ic ON\n\tic.image_id = $1;",
-    "describe": {
-      "columns": [
-        {
-          "ordinal": 0,
-          "name": "id",
-          "type_info": "Uuid"
-        },
-        {
-          "ordinal": 1,
-          "name": "created",
-          "type_info": "Timestamptz"
-        },
-        {
-          "ordinal": 2,
-          "name": "category_name",
-          "type_info": "Text"
-        }
-      ],
-      "parameters": {
-        "Left": [
-          "Uuid"
-        ]
-      },
-      "nullable": [
         false,
         false,
         false

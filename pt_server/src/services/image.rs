@@ -45,6 +45,7 @@ pub trait ImageService: Service {
         rating: u32,
     ) -> Result<(), RateImageError>;
     async fn get_image_ratings(&self, image_id: Uuid) -> Result<Vec<Rating>, GetImageRatingsError>;
+    async fn get_user_ratings(&self) -> Result<Vec<UserRating>, GetUserRatingsError>;
 
     async fn get_categories(&self) -> Result<Vec<CategoryExt>, GetCategoriesError>;
     async fn create_category(&self, name: &str) -> Result<Uuid, CreateCategoryError>;
@@ -250,7 +251,9 @@ impl ImageService for DefaultImageService {
         Ok(images
             .into_iter()
             .zip(categories)
-            // Filter only uploaded images
+            // Filter only uploaded images,
+            // this is required because the image is not
+            // guaranteed to be on storage, even if it was once uploaded.
             .filter(|(i, _)| {
                 Path::new(&self.config.image_storage_path)
                     .join(&i.id.to_hyphenated().to_string())
@@ -439,5 +442,22 @@ impl ImageService for DefaultImageService {
         })?;
 
         Ok((image, categories))
+    }
+
+    async fn get_user_ratings(&self) -> Result<Vec<UserRating>, GetUserRatingsError> {
+        Ok(crate::db::rating::UserRating::all(&self.pool)
+            .await
+            .map_err(|e| {
+                error!(&self.logger, "unexpected database error";
+                    "error" => e.to_string()
+                );
+                GetUserRatingsError::Unexpected
+            })?
+            .into_iter()
+            .map(|r| UserRating {
+                name: r.email,
+                average_rating: r.average_rating.unwrap_or(0f64),
+            })
+            .collect())
     }
 }

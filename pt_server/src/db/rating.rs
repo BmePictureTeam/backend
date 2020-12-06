@@ -36,3 +36,16 @@ impl Rating {
         .map(|_| ())
     }
 }
+
+pub struct UserRating {
+    pub email: String,
+    pub average_rating: Option<f64>,
+}
+
+impl UserRating {
+    pub async fn all(pool: &PgPool) -> Result<Vec<UserRating>, sqlx::Error> {
+        query_file_as!(UserRating, "queries/rating/all_by_users.sql")
+            .fetch_all(pool)
+            .await
+    }
+}

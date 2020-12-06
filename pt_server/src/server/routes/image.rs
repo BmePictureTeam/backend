@@ -4,8 +4,9 @@ use crate::{
     model::error::GenericError,
     model::image::{
         CreateImageError, CreateImageRequest, CreateImageResponse, GetImageRatingResponse,
-        GetImageRatingsError, GetImageResponse, Image, RateImageError, RateImageRequest,
-        SearchImagesError, SearchImagesQuery, SearchImagesResponse, UploadImageError,
+        GetImageRatingsError, GetImageResponse, GetUserRatingsError, GetUserRatingsResponse, Image,
+        RateImageError, RateImageRequest, SearchImagesError, SearchImagesQuery,
+        SearchImagesResponse, UploadImageError,
     },
     server::extractors::SessionToken,
     services::image::ImageService,
@@ -273,8 +274,28 @@ async fn get_image_rating(
     }
 }
 
+#[api]
+#[get("/images/ratings")]
+#[tag(TAG_NAME)]
+#[response(200, GetUserRatingsResponse)]
+#[response(404)]
+async fn get_user_ratings(
+    _token: SessionToken,
+    image_service: web::Data<Box<dyn ImageService>>,
+) -> HttpResponse {
+    match image_service.get_user_ratings().await {
+        Ok(ratings) => HttpResponse::Ok().json(GetUserRatingsResponse { ratings }),
+        Err(err) => match err {
+            GetUserRatingsError::Unexpected => {
+                HttpResponse::InternalServerError().json(GenericError::default())
+            }
+        },
+    }
+}
+
 pub fn configure_routes(_config: &Config) -> impl FnOnce(&mut ServiceConfig) {
     move |app: &mut ServiceConfig| {
+        app.service(get_user_ratings);
         app.service(create_image);
         app.service(upload_image);
         app.service(get_image);

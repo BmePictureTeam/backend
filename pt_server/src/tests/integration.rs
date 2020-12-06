@@ -140,6 +140,11 @@ impl ImageService for TestImageService {
         // Checks or mocks here.
         self.0.get_image_info(id).await
     }
+
+    async fn get_user_ratings(&self) -> Result<Vec<UserRating>, GetUserRatingsError> {
+        // Checks or mocks here.
+        self.0.get_user_ratings().await
+    }
 }
 
 pub fn configure_services(
@@ -391,7 +396,7 @@ async fn whole_app() {
         let search_images_res_data: SearchImagesResponse =
             test::read_body_json(search_images_res).await;
 
-        assert!(search_images_res_data.images.len() == 1);
+        assert!(search_images_res_data.images.len() >= 1);
 
         // Finally image download
         let download_image_req = test::TestRequest::get()
